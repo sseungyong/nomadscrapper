@@ -1,8 +1,10 @@
-import requests
-from bs4 import BeautifulSoup
+from indeed import get_indeed_jobs
+from so import get_so_jobs
+from save import save_to_file
 
-from indeed import extract_indeed_pages, extract_indeed_jobs
 
-max_indeed_pages = extract_indeed_pages()
+indeed_jobs = get_indeed_jobs()
+so_jobs = get_so_jobs()
+jobs = indeed_jobs + so_jobs
 
-extract_indeed_jobs(max_indeed_pages)
+save_to_file(jobs)
