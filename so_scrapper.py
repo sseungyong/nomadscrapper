@@ -1,12 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 
-LIMIT = 50
-SO_URL = f"https://stackoverflow.com/jobs?q=python"
 
-
-def extract_so_pages():
-    result = requests.get(SO_URL)
+def so_last_page(url):
+    result = requests.get(url)
     soup = BeautifulSoup(result.text, "html.parser")
     pagination = soup.find("div", {"class": "s-pagination"})
     pages = pagination.find_all("a")
@@ -25,10 +22,11 @@ def extract_jobs(html):
     return {"title": title, "company": company, "location": location, "link": f"https://stackoverflow.com/jobs/{job_id}"}
 
 
-def extract_so_jobs(last_page):
+def extract_so_jobs(last_page, url):
     jobs = []
     for page in range(last_page):
-        result = requests.get(f"{SO_URL}&pg={page+1}")
+        print(f"Scrapping StackOverFlow :: page {page+1}")
+        result = requests.get(f"{url}&pg={page+1}")
         soup = BeautifulSoup(result.text, "html.parser")
         results = soup.find_all("div", {"class": "-job"})
         for result in results:
@@ -37,14 +35,15 @@ def extract_so_jobs(last_page):
     return jobs
 
 
-def get_so_jobs():
-    max_so_pages = extract_so_pages()
-    so_jobs = extract_so_jobs(max_so_pages)
+def get_so_jobs(word):
+    url = f"https://stackoverflow.com/jobs?q={word}"
+    last_page = so_last_page(url)
+    so_jobs = extract_so_jobs(last_page, url)
 
     return so_jobs
 
 
 if __name__ == "__main__":
-    # xx = extract_so_pages()
-    xx = extract_so_jobs(0)
+    word = "python"
+    xx = get_so_jobs(word)
     print(xx)

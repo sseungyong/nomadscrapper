@@ -2,11 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 
 LIMIT = 50
-INDEED_URL = f"https://www.indeed.com/jobs?q=python&limit={LIMIT}"
 
 
-def extract_indeed_pages():
-    result = requests.get(INDEED_URL)
+def indeed_last_page(url):
+    result = requests.get(url)
     soup = BeautifulSoup(result.text, "html.parser")
 
     pagination = soup.find("div", {"class": "pagination"})
@@ -36,10 +35,11 @@ def extract_jobs(html):
     return {"title": title, "company": company, "location": location, "link": f"https://www.indeed.com/viewjob?jk={job_id}"}
 
 
-def extract_indeed_jobs(last_page):
+def extract_indeed_jobs(last_page, url):
     jobs = []
     for page in range(last_page):
-        result = requests.get(f"{INDEED_URL}&start={page*LIMIT}")
+        print(f"Scrapping Indeed :: page {page+1}")
+        result = requests.get(f"{url}&start={page*LIMIT}")
         soup = BeautifulSoup(result.text, "html.parser")
         results = soup.find_all("div", {"class": "jobsearch-SerpJobCard"})
         for result in results:
@@ -48,13 +48,15 @@ def extract_indeed_jobs(last_page):
     return jobs
 
 
-def get_indeed_jobs():
-    max_indeed_pages = extract_indeed_pages()
-    indeed_jobs = extract_indeed_jobs(max_indeed_pages)
+def get_indeed_jobs(word):
+    url = f"https://www.indeed.com/jobs?q={word}&limit={LIMIT}"
+    last_page = indeed_last_page(url)
+    indeed_jobs = extract_indeed_jobs(last_page, url)
 
     return indeed_jobs
 
 
 if __name__ == "__main__":
-    xx = extract_indeed_jobs(0)
+    word = "python"
+    xx = get_indeed_jobs(word)
     print(xx)
